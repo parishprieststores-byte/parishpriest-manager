@@ -1,0 +1,1255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5, viewport-fit=cover">
+<title>ParishPriest — Multi-Category Manager</title>
+<meta name="theme-color" content="#101828">
+<meta name="color-scheme" content="light dark">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="ParishPriest">
+<meta name="description" content="Offline multi-category business manager for school, church, supermarket and pharmacy.">
+<link rel="manifest" id="manifestLink" href="./manifest.webmanifest">
+<link rel="apple-touch-icon" href="./icon-192.png">
+<link rel="icon" id="iconLink" href="./icon-192.png">
+<style>
+:root{
+  --navy:#101828; --navy-2:#1b2537; --blue:#2563eb; --blue-dark:#1d4ed8;
+  --bg:#f4f5f7; --card:#ffffff; --line:#e5e7eb; --ink:#111827; --muted:#6b7280;
+  --green:#16a34a; --red:#dc2626; --amber:#d97706; --radius:12px;
+  --safe-t:env(safe-area-inset-top,0px);
+  --safe-b:env(safe-area-inset-bottom,0px);
+  --safe-l:env(safe-area-inset-left,0px);
+  --safe-r:env(safe-area-inset-right,0px);
+}
+html[data-theme="dark"]{
+  --bg:#0b1220; --card:#151e2e; --line:#28344a; --ink:#e8edf5; --muted:#94a3b8;
+  --navy:#0a0f1a; --navy-2:#1a2436;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+html{-webkit-text-size-adjust:100%}
+body{background:var(--bg);color:var(--ink);font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;overscroll-behavior-y:contain}
+.hidden{display:none!important}
+.muted{color:var(--muted)}
+.tiny{font-size:12.5px}
+.err{color:var(--red);font-size:13.5px;min-height:18px;margin:8px 0 0}
+h1,h2,h3{margin:0;font-weight:700;letter-spacing:-.01em}
+button{font:inherit;cursor:pointer}
+input,select,textarea{font:16px/1.4 inherit;color:var(--ink)}
+.btn{border:1px solid var(--line);background:var(--card);border-radius:10px;padding:12px 16px;font-weight:600;font-size:15px;min-height:46px;display:inline-flex;align-items:center;gap:7px}
+.btn:hover{background:#f9fafb}
+.btn.primary{background:var(--blue);border-color:var(--blue);color:#fff}
+.btn.primary:hover{background:var(--blue-dark)}
+.btn.ghost{background:transparent;border-color:transparent;color:var(--blue);padding:10px;font-size:14px;min-height:44px}
+.btn.danger{color:var(--red);border-color:#fecaca}
+.btn.block{width:100%;justify-content:center}
+.icon-btn{border:1px solid var(--line);background:var(--card);border-radius:10px;min-width:44px;min-height:44px;color:var(--muted);display:inline-flex;align-items:center;justify-content:center;font-size:16px}
+.mini{border:1px solid var(--line);background:var(--card);border-radius:9px;padding:9px 13px;font-size:13px;font-weight:600;min-height:44px;display:inline-flex;align-items:center;gap:6px}
+.mini.del{color:var(--red);border-color:#fecaca}
+
+/* ---------- Lock ---------- */
+.lock-screen{min-height:100dvh;display:flex;align-items:center;justify-content:center;
+  background:radial-gradient(1000px 600px at 50% -10%,#1e293b,#0b1220);padding:calc(24px + var(--safe-t)) 20px calc(24px + var(--safe-b))}
+.lock-card{width:100%;max-width:400px;background:#fff;color:#111827;border-radius:18px;padding:30px 24px;text-align:center;box-shadow:0 24px 60px rgba(0,0,0,.45)}
+.lock-card h1{font-size:26px;margin-top:14px}
+.lock-card p{margin:6px 0 20px}
+.lock-card label{display:block;text-align:left;font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#6b7280;margin-bottom:6px}
+.lock-card input{width:100%;padding:14px;border:1px solid #e5e7eb;border-radius:11px;letter-spacing:.24em;text-align:center;font-size:18px;margin-bottom:14px}
+.brand-logo{width:44px;height:44px;border-radius:12px;background:var(--blue);color:#fff;font-weight:800;display:flex;align-items:center;justify-content:center;font-size:15px;flex:0 0 auto}
+.brand-logo.big{width:62px;height:62px;border-radius:17px;font-size:22px;margin:0 auto}
+
+/* ---------- Shell ---------- */
+.app{display:flex;min-height:100dvh}
+.sidebar{width:264px;flex:0 0 264px;background:var(--navy);color:#e5e7eb;display:flex;flex-direction:column;
+  padding:calc(20px + var(--safe-t)) 16px 20px;position:sticky;top:0;height:100dvh;overflow-y:auto}
+.brand{display:flex;gap:11px;align-items:center;padding:0 4px 20px;border-bottom:1px solid #263247}
+.brand-name{color:#fff;font-weight:700;font-size:15px}
+.brand-sub{color:#94a3b8;font-size:11.5px}
+.side-label{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#64748b;margin:20px 6px 9px;font-weight:700}
+.cat-btn{display:flex;align-items:center;gap:10px;width:100%;background:transparent;border:0;color:#cbd5e1;
+  padding:12px 12px;border-radius:10px;text-align:left;font-size:14.5px;font-weight:600;margin-bottom:4px;min-height:46px}
+.cat-btn.active{background:var(--blue);color:#fff}
+.cat-btn .dot{width:8px;height:8px;border-radius:50%;background:#475569;flex:0 0 8px}
+.cat-btn.active .dot{background:#bfdbfe}
+.cat-btn .lk{font-size:11.5px;margin-left:auto;color:#94a3b8}
+.side-foot{margin-top:auto;padding-top:18px}
+.foot-card{background:var(--navy-2);border-radius:11px;padding:13px;font-size:12.5px;color:#cbd5e1}
+.foot-card strong{color:#fff;display:block;font-size:13px;margin-bottom:2px}
+.side-foot .tiny{color:#64748b;margin:12px 4px 0;line-height:1.45}
+.side-foot a{color:#94a3b8}
+.install-btn{width:100%;margin-top:12px;background:var(--blue);border:0;color:#fff;border-radius:11px;padding:13px;font-weight:700;font-size:14px;min-height:48px}
+
+.main{flex:1;min-width:0;padding:26px 30px calc(60px + var(--safe-b));padding-right:calc(30px + var(--safe-r));padding-left:calc(30px + var(--safe-l))}
+.topbar{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap}
+.eyebrow{font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--blue);font-weight:800}
+.cat-title{display:flex;align-items:center;gap:9px;font-size:30px;margin-top:5px}
+.searchrow{display:flex;align-items:center;gap:12px;margin:18px 0 16px;flex-wrap:wrap}
+.searchrow input{flex:1;min-width:200px;max-width:460px;padding:13px 15px;border:1px solid var(--line);border-radius:11px;background:var(--card)}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(168px,1fr));gap:13px;margin-bottom:20px}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:15px 16px}
+.stat .k{font-size:11px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);font-weight:700}
+.stat .v{font-size:25px;font-weight:800;margin:6px 0 3px;letter-spacing:-.02em}
+.stat .s{font-size:12.5px;color:var(--muted)}
+.stat.good .v{color:var(--green)} .stat.bad .v{color:var(--red)} .stat.warn .v{color:var(--amber)}
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);margin-bottom:18px;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tab{background:transparent;border:0;border-bottom:2.5px solid transparent;padding:13px 14px;color:var(--muted);font-weight:700;font-size:14.5px;white-space:nowrap;min-height:48px}
+.tab.active{color:var(--blue);border-bottom-color:var(--blue)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:18px;margin-bottom:18px}
+.card-head{display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:14px}
+.card-head h3{font-size:16.5px}
+.card-head .sub{font-size:12.5px;color:var(--muted);margin-top:2px}
+table{width:100%;border-collapse:collapse;font-size:14.5px}
+th{text-align:left;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:700;padding:11px 12px;background:rgba(128,140,160,.08);border-bottom:1px solid var(--line)}
+td{padding:12px;border-bottom:1px solid rgba(128,140,160,.16);vertical-align:middle}
+tr:last-child td{border-bottom:0}
+td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
+.empty{text-align:center;padding:38px 16px;color:var(--muted)}
+.empty .ico{font-size:30px;opacity:.5}
+.pill{display:inline-block;padding:4px 10px;border-radius:999px;font-size:11.5px;font-weight:700}
+.pill.paid{background:#dcfce7;color:#15803d}.pill.credit{background:#fef3c7;color:#b45309}
+.pill.good{background:#dcfce7;color:#15803d}.pill.warn{background:#fef3c7;color:#b45309}.pill.bad{background:#fee2e2;color:#b91c1c}
+.pill.info{background:#dbeafe;color:#1d4ed8}
+.row-actions{display:flex;gap:7px;justify-content:flex-end;flex-wrap:wrap}
+.toolbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.toolbar input,.toolbar select{padding:11px 12px;border:1px solid var(--line);border-radius:10px;background:var(--card);min-height:44px}
+.modal{position:fixed;inset:0;background:rgba(15,23,42,.6);display:flex;align-items:flex-end;justify-content:center;z-index:60}
+.modal-card{background:var(--card);border-radius:18px 18px 0 0;width:100%;max-width:560px;padding:22px 20px calc(22px + var(--safe-b));max-height:92dvh;overflow:auto;-webkit-overflow-scrolling:touch}
+.modal-card h3{margin-bottom:14px;font-size:19px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.fld{display:flex;flex-direction:column;gap:6px;margin-bottom:13px}
+.fld label{font-size:12px;font-weight:700;color:var(--muted);letter-spacing:.04em;text-transform:uppercase}
+.fld input,.fld select{padding:13px 13px;border:1px solid var(--line);border-radius:10px;background:var(--bg);min-height:48px;width:100%}
+.modal-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:18px;position:sticky;bottom:0;background:var(--card);padding-top:12px}
+#toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(22px + var(--safe-b));background:var(--navy);color:#fff;padding:13px 18px;border-radius:11px;font-size:14px;font-weight:600;box-shadow:0 10px 30px rgba(0,0,0,.35);opacity:0;pointer-events:none;transition:opacity .25s;z-index:80;max-width:92vw;text-align:center}
+#toast.show{opacity:1}
+.notice{background:rgba(37,99,235,.09);border:1px solid rgba(37,99,235,.28);color:var(--ink);border-radius:10px;padding:12px 14px;font-size:13.5px;margin-bottom:14px}
+.snap{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid rgba(128,140,160,.16);flex-wrap:wrap}
+.receipt{background:#fff;color:#111;border-radius:12px;padding:22px;font-family:ui-monospace,"Courier New",monospace;font-size:13.5px}
+.receipt h4{text-align:center;margin:0 0 4px;font-size:16px}
+.receipt .rc-line{display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px dashed #cbd5e1}
+.receipt .rc-total{display:flex;justify-content:space-between;font-weight:800;font-size:15px;padding-top:9px}
+#printArea{display:none}
+
+/* ---------- Tablet & phone ---------- */
+@media (max-width:880px){
+  .app{flex-direction:column}
+  .sidebar{position:sticky;top:0;width:100%;flex:none;height:auto;overflow:visible;
+    padding:calc(10px + var(--safe-t)) 12px 10px;z-index:40;box-shadow:0 4px 18px rgba(0,0,0,.18)}
+  .brand{padding:0 2px 10px;border-bottom:0}
+  .side-label,.side-foot{display:none}
+  #catNav{display:flex;gap:8px;overflow-x:auto;-webkit-overflow-scrolling:touch;padding:6px 2px 2px;scrollbar-width:none}
+  #catNav::-webkit-scrollbar{display:none}
+  .cat-btn{width:auto;flex:0 0 auto;padding:12px 15px;margin:0;min-height:46px}
+  .cat-btn .lk{display:none}
+  .main{padding:18px 16px calc(64px + var(--safe-b))}
+  .cat-title{font-size:24px}
+  .topbar{align-items:center}
+  .topbar .btn.primary{width:100%;justify-content:center}
+  .searchrow input{max-width:none}
+  .grid2{grid-template-columns:1fr}
+  .modal{align-items:flex-end}
+  .icon-btn{min-width:48px;min-height:48px}
+}
+/* Card-ify tables on small screens */
+@media (max-width:620px){
+  table{border:0}
+  table thead{display:none}
+  table tbody tr{display:block;border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-bottom:11px;background:var(--card)}
+  table tbody td{display:flex;justify-content:space-between;align-items:center;gap:14px;border:0;padding:7px 0;text-align:right}
+  table tbody td::before{content:attr(data-label);font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:700;text-align:left;flex:0 0 auto}
+  table tbody td.num{text-align:right}
+  table tbody td:empty{display:none}
+  .row-actions{justify-content:stretch;width:100%}
+  .row-actions .mini{flex:1}
+  td .row-actions{justify-content:flex-end}
+  .stat .v{font-size:23px}
+}
+@media print{
+  .sidebar,.tabs,.topbar .btn,.searchrow,#toast,.modal,#lock{display:none!important}
+  body{background:#fff}.main{padding:0}.card{break-inside:avoid;border-color:#ddd}
+  #printArea{display:block!important}
+}
+</style>
+</head>
+<body>
+
+<!-- ============ APP LOCK ============ -->
+<div id="lock" class="lock-screen">
+  <div class="lock-card">
+    <div class="brand-logo big">PP</div>
+    <h1>ParishPriest</h1>
+    <p class="muted">Multi-Category Manager — Secure Access</p>
+    <label for="lockInput">App passcode</label>
+    <input id="lockInput" type="password" inputmode="numeric" autocomplete="off" placeholder="••••••">
+    <button class="btn primary block" id="lockBtn">Unlock app</button>
+    <p id="lockMsg" class="err"></p>
+    <p class="tiny muted">Each category then asks for its own passcode.</p>
+  </div>
+</div>
+
+<!-- ============ APP ============ -->
+<div id="app" class="app hidden">
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-logo">PP</div>
+      <div><div class="brand-name">ParishPriest</div><div class="brand-sub">Inventory Manager</div></div>
+    </div>
+    <div class="side-label">Categories</div>
+    <nav id="catNav"></nav>
+    <div class="side-foot">
+      <div class="foot-card" id="footCard">
+        <strong>Daily backup</strong>
+        <span id="footBackup">No snapshot yet</span>
+      </div>
+      <button class="install-btn hidden" id="installBtn">Install app on this device</button>
+      <div class="tiny" id="netBadge" style="margin-top:10px"></div>
+      <p class="tiny" style="margin-top:14px">
+        <a href="#" id="themeBtn">Switch appearance</a> &nbsp;·&nbsp;
+        <a href="#" id="lockNow">Lock app</a>
+      </p>
+      <p class="tiny">Records are stored on this device. Switch categories without mixing records.</p>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="topbar">
+      <div>
+        <div class="eyebrow" id="catEyebrow">Category</div>
+        <h1 class="cat-title"><span id="catTitle">Category</span>
+          <button class="icon-btn" id="renameBtn" title="Rename this category" aria-label="Rename category">✎</button>
+        </h1>
+      </div>
+      <button class="btn primary" id="addBtn">+ Add record</button>
+    </div>
+
+    <div class="searchrow">
+      <input id="search" placeholder="Search records in this category…" autocomplete="off">
+      <span class="muted tiny" id="count"></span>
+    </div>
+
+    <section class="stats" id="stats"></section>
+    <nav class="tabs" id="tabs"></nav>
+    <section id="panel"></section>
+  </main>
+</div>
+
+<!-- ============ MODAL ============ -->
+<div id="modal" class="modal hidden">
+  <div class="modal-card">
+    <h3 id="modalTitle">Add record</h3>
+    <div id="modalBody"></div>
+    <div class="modal-actions">
+      <button class="btn" id="modalCancel">Close</button>
+      <button class="btn primary" id="modalSave">Save</button>
+    </div>
+  </div>
+</div>
+
+<div id="printArea"></div>
+<div id="toast"></div>
+
+<script>
+(function () {
+  'use strict';
+
+  var STORE_KEY = 'pp_manager_v1';
+  var THEME_KEY = 'pp_theme';
+  var APP_PASS_DEFAULT = '201301';
+  var CUR = '';
+
+  var MODULES = {
+    inventory:  { key: 'inventory',  label: 'Inventory',              single: 'Stock item' },
+    purchases:  { key: 'purchases',  label: 'Purchase',               single: 'Purchase' },
+    sales:      { key: 'sales',      label: 'Sales',                  single: 'Sale' },
+    accounting: { key: 'accounting', label: 'Accounting',             single: 'Entry' },
+    sacraments: { key: 'sacraments', label: 'Sacrament Records',      single: 'Sacrament' },
+    students:   { key: 'students',   label: 'Student Academic Record', single: 'Student' },
+    classrooms: { key: 'classrooms', label: 'Classrooms',             single: 'Classroom' },
+    teachers:   { key: 'teachers',   label: 'Teachers',               single: 'Teacher' },
+    leadership: { key: 'leadership', label: 'Leadership',             single: 'Post' },
+    staff:      { key: 'staff',      label: 'Staff & Roles',          single: 'Staff member' },
+    services:   { key: 'services',   label: 'Services',               single: 'Service' },
+    members:    { key: 'members',    label: 'Members',                single: 'Member' },
+    pastors:    { key: 'pastors',    label: 'Pastors',                single: 'Pastor' },
+    ushers:     { key: 'ushers',     label: 'Ushers',                 single: 'Usher' },
+    contributions: { key: 'contributions', label: 'Contributions',    single: 'Contribution' },
+    projects:   { key: 'projects',   label: 'Projects',               single: 'Project' },
+    events:     { key: 'events',     label: 'Events',                 single: 'Event' },
+    reports:    { key: 'reports',    label: 'Report',                 single: 'Report' },
+    backup:     { key: 'backup',     label: 'Daily Backup',           single: 'Backup' }
+  };
+
+  var ALL_RECS = ['inventory', 'purchases', 'sales', 'accounting', 'sacraments', 'students', 'classrooms', 'teachers', 'leadership', 'staff', 'events', 'services', 'members', 'pastors', 'ushers', 'contributions', 'projects'];
+
+  var CATS = {
+    school:      { key: 'school',      name: 'School',      pass: 'SCH2013', modules: ['classrooms', 'teachers', 'students', 'leadership', 'staff', 'purchases', 'sales', 'accounting', 'events', 'reports', 'backup'] },
+    church:      { key: 'church',      name: 'Church',      pass: 'CHU2013', modules: ['services', 'members', 'pastors', 'ushers', 'contributions', 'projects', 'events', 'sacraments', 'purchases', 'sales', 'accounting', 'reports', 'backup'] },
+    supermarket: { key: 'supermarket', name: 'Supermarket', pass: 'SUP2013', modules: ['inventory', 'purchases', 'sales', 'accounting', 'reports', 'backup'] },
+    pharmacy:    { key: 'pharmacy',    name: 'Pharmacy',    pass: 'PHA2013', modules: ['inventory', 'purchases', 'sales', 'accounting', 'reports', 'backup'] }
+  };
+
+  var FIELDS = {
+    inventory: [
+      { k: 'sku',      l: 'SKU / code',  t: 'text',   req: 1, ph: 'e.g. PH-0001' },
+      { k: 'name',     l: 'Item name',   t: 'text',   req: 1, ph: 'e.g. Paracetamol 500mg' },
+      { k: 'category', l: 'Group',       t: 'text',   ph: 'e.g. Analgesics / Beverages' },
+      { k: 'stock',    l: 'Stock qty',   t: 'number', req: 1 },
+      { k: 'reorder',  l: 'Reorder at',  t: 'number', req: 1 },
+      { k: 'unitCost', l: 'Unit cost',   t: 'number' },
+      { k: 'unitPrice',l: 'Unit price',  t: 'number' },
+      { k: 'expiry',   l: 'Expiry date', t: 'date' }
+    ],
+    purchases: [
+      { k: 'date',     l: 'Date',       t: 'date',   req: 1 },
+      { k: 'supplier', l: 'Supplier',   t: 'text',   req: 1, ph: 'e.g. Mainland Supplies' },
+      { k: 'item',     l: 'Item',       t: 'text',   req: 1 },
+      { k: 'qty',      l: 'Quantity',   t: 'number', req: 1 },
+      { k: 'unitCost', l: 'Unit cost',  t: 'number', req: 1 },
+      { k: 'paid',     l: 'Payment',    t: 'select', opts: ['Paid', 'Credit'] }
+    ],
+    sales: [
+      { k: 'date',      l: 'Date',        t: 'date',   req: 1 },
+      { k: 'customer',  l: 'Customer',    t: 'text',   req: 1, ph: 'Customer / patient / ward' },
+      { k: 'item',      l: 'Item',        t: 'text',   req: 1 },
+      { k: 'qty',       l: 'Quantity',    t: 'number', req: 1 },
+      { k: 'unitPrice', l: 'Unit price',  t: 'number', req: 1 },
+      { k: 'paid',      l: 'Payment',     t: 'select', opts: ['Paid', 'Credit'] }
+    ],
+    accounting: [
+      { k: 'date',        l: 'Date',        t: 'date',   req: 1 },
+      { k: 'type',        l: 'Type',        t: 'select', opts: ['Income', 'Expense'] },
+      { k: 'account',     l: 'Account',     t: 'text',   req: 1, ph: 'e.g. Utilities, Salaries' },
+      { k: 'description', l: 'Description', t: 'text',   ph: 'Optional note' },
+      { k: 'amount',      l: 'Amount',      t: 'number', req: 1 }
+    ],
+    sacraments: [
+      { k: 'date',     l: 'Date',       t: 'date',   req: 1 },
+      { k: 'type',     l: 'Sacrament',  t: 'select', opts: ['Baptism', 'Confirmation', 'First Communion', 'Marriage', 'Burial', 'Dedication'] },
+      { k: 'name',     l: 'Full name',  t: 'text',   req: 1 },
+      { k: 'second',   l: 'Spouse / parent / guardian', t: 'text', ph: 'Optional' },
+      { k: 'minister', l: 'Minister',   t: 'text',   ph: 'Officiating priest' },
+      { k: 'register', l: 'Register no.', t: 'text', ph: 'e.g. BAP/2026/018' },
+      { k: 'notes',    l: 'Notes',      t: 'text' }
+    ],
+    students: [
+      { k: 'studentId', l: 'Student ID', t: 'text',   req: 1, ph: 'e.g. SCH/2026/014' },
+      { k: 'name',      l: 'Student name', t: 'text', req: 1 },
+      { k: 'className', l: 'Class',      t: 'text',   req: 1, ph: 'e.g. JSS 2A' },
+      { k: 'term',      l: 'Term',       t: 'select', opts: ['First Term', 'Second Term', 'Third Term'] },
+      { k: 'subject',   l: 'Subject',    t: 'text',   req: 1, ph: 'e.g. Mathematics' },
+      { k: 'score',     l: 'Score (0-100)', t: 'number', req: 1 },
+      { k: 'remarks',   l: 'Remarks',    t: 'text' }
+    ],
+    classrooms: [
+      { k: 'name',       l: 'Class name',       t: 'text',   req: 1, ph: 'e.g. JSS 1A' },
+      { k: 'level',      l: 'Level / section',  t: 'text',   ph: 'e.g. Junior Secondary' },
+      { k: 'formMaster', l: 'Form teacher',     t: 'text',   ph: 'Teacher in charge' },
+      { k: 'room',       l: 'Room / block',     t: 'text' },
+      { k: 'capacity',   l: 'Capacity',         t: 'number' },
+      { k: 'enrolled',   l: 'Students enrolled', t: 'number' },
+      { k: 'notes',      l: 'Notes',            t: 'text' }
+    ],
+    teachers: [
+      { k: 'staffId',       l: 'Staff ID',       t: 'text' },
+      { k: 'name',          l: 'Teacher name',   t: 'text', req: 1 },
+      { k: 'subjects',      l: 'Subjects',       t: 'text', ph: 'e.g. Mathematics, Physics' },
+      { k: 'className',     l: 'Class assigned', t: 'text', ph: 'e.g. JSS 2A' },
+      { k: 'qualification', l: 'Qualification',  t: 'text', ph: 'e.g. B.Ed' },
+      { k: 'phone',         l: 'Phone',          t: 'text' },
+      { k: 'status',        l: 'Status',         t: 'select', opts: ['Active', 'On Leave', 'Inactive'] }
+    ],
+    leadership: [
+      { k: 'post',   l: 'Post',   t: 'select', opts: ['Proprietor', 'Principal', 'Vice Principal (VP)', 'Head Teacher', 'Security'] },
+      { k: 'name',   l: 'Name',   t: 'text' },
+      { k: 'phone',  l: 'Phone',  t: 'text' },
+      { k: 'duty',   l: 'Duty / portfolio', t: 'text', ph: 'e.g. Oversees finance, policy and discipline' },
+      { k: 'since',  l: 'In post since',    t: 'date' },
+      { k: 'status', l: 'Status', t: 'select', opts: ['Active', 'Vacant', 'On Leave'] }
+    ],
+    staff: [
+      { k: 'name',       l: 'Name',       t: 'text', req: 1 },
+      { k: 'role',       l: 'Role',       t: 'select', opts: ['Proprietor', 'Principal', 'Vice Principal (VP)', 'Head Teacher', 'Security', 'Teacher', 'Bursar', 'Librarian', 'Lab Technician', 'Nurse', 'Cook', 'Cleaner', 'Driver', 'Gardener', 'Other'] },
+      { k: 'department', l: 'Department', t: 'text' },
+      { k: 'phone',      l: 'Phone',      t: 'text' },
+      { k: 'status',     l: 'Status',     t: 'select', opts: ['Active', 'On Leave', 'Inactive'] }
+    ],
+    events: [
+      { k: 'title',     l: 'Event title', t: 'text', req: 1 },
+      { k: 'date',      l: 'Date',        t: 'date', req: 1 },
+      { k: 'endDate',   l: 'End date',    t: 'date' },
+      { k: 'type',      l: 'Type',        t: 'select', opts: ['Other'], catOpts: {
+          school: ['Academic', 'Examination', 'PTA Meeting', 'Sports Day', 'Speech & Prize Giving', 'Graduation', 'Excursion', 'Cultural Day', 'Other'],
+          church: ['Anniversary', 'Birthday', 'Convention', 'Crusade', 'Retreat', 'Harvest / Thanksgiving', 'Funeral', 'Wedding', 'Outreach', 'Other']
+        } },
+      { k: 'venue',     l: 'Venue',       t: 'text' },
+      { k: 'organizer', l: 'Organiser',   t: 'text' },
+      { k: 'notes',     l: 'Notes',       t: 'text' }
+    ],
+    services: [
+      { k: 'date',        l: 'Date',    t: 'date', req: 1 },
+      { k: 'serviceType', l: 'Service', t: 'select', opts: ['Sunday Service', 'Tuesday Service', 'Thursday Service', 'Anniversary', 'Birthday', 'Special Service', 'Vigil', 'Communion Service'] },
+      { k: 'theme',       l: 'Theme / sermon', t: 'text' },
+      { k: 'preacher',    l: 'Preacher', t: 'text', ph: 'Minister / pastor' },
+      { k: 'attendance',  l: 'Attendance', t: 'number' },
+      { k: 'offering',    l: 'Offering collected', t: 'number' },
+      { k: 'notes',       l: 'Notes',    t: 'text' }
+    ],
+    members: [
+      { k: 'memberId',  l: 'Member ID', t: 'text', ph: 'e.g. CHU/2026/102' },
+      { k: 'name',      l: 'Full name', t: 'text', req: 1 },
+      { k: 'gender',    l: 'Gender',    t: 'select', opts: ['Male', 'Female'] },
+      { k: 'category',  l: 'Category',  t: 'select', opts: ['Member', 'Worker', 'Leader', 'Usher', 'Choir', 'Youth', 'Children'] },
+      { k: 'phone',     l: 'Phone',     t: 'text' },
+      { k: 'address',   l: 'Address / ward', t: 'text' },
+      { k: 'birthDate', l: 'Date of birth', t: 'date' },
+      { k: 'joinDate',  l: 'Joined',    t: 'date' },
+      { k: 'status',    l: 'Status',    t: 'select', opts: ['Active', 'Inactive', 'Transferred'] }
+    ],
+    pastors: [
+      { k: 'name',       l: 'Name', t: 'text', req: 1 },
+      { k: 'role',       l: 'Role', t: 'select', opts: ['Pastor', 'Senior Pastor', 'Assistant Pastor', 'Associate Pastor', 'Guest Minister', 'Evangelist', 'Deacon'] },
+      { k: 'phone',      l: 'Phone', t: 'text' },
+      { k: 'assignment', l: 'Assignment / department', t: 'text' },
+      { k: 'ordination', l: 'Ordained', t: 'date' },
+      { k: 'status',     l: 'Status', t: 'select', opts: ['Active', 'On Leave', 'Inactive'] }
+    ],
+    ushers: [
+      { k: 'usherId', l: 'Usher ID', t: 'text' },
+      { k: 'name',    l: 'Name', t: 'text', req: 1 },
+      { k: 'team',    l: 'Team / group', t: 'select', opts: ['Team A', 'Team B', 'Team C', 'Team D', 'Team E', 'Team F', 'Coordinator'] },
+      { k: 'phone',   l: 'Phone', t: 'text' },
+      { k: 'duty',    l: 'Duty', t: 'text', ph: 'e.g. Main entrance' },
+      { k: 'status',  l: 'Status', t: 'select', opts: ['Active', 'Inactive'] }
+    ],
+    contributions: [
+      { k: 'date',        l: 'Date', t: 'date', req: 1 },
+      { k: 'contributor', l: 'Contributor', t: 'text', req: 1, ph: 'Member / group' },
+      { k: 'type',        l: 'Type', t: 'select', opts: ['Tithe', 'Offering', 'Pledge', 'Seed', 'Building Fund', 'Project Fund', 'Donation', 'Welfare', 'Other'] },
+      { k: 'amount',      l: 'Amount', t: 'number', req: 1 },
+      { k: 'method',      l: 'Method', t: 'select', opts: ['Cash', 'Transfer', 'POS', 'Cheque'] },
+      { k: 'receipt',     l: 'Receipt no.', t: 'text' },
+      { k: 'notes',       l: 'Notes', t: 'text' }
+    ],
+    projects: [
+      { k: 'title',    l: 'Project', t: 'text', req: 1 },
+      { k: 'start',    l: 'Start date', t: 'date' },
+      { k: 'deadline', l: 'Deadline', t: 'date' },
+      { k: 'budget',   l: 'Budget', t: 'number' },
+      { k: 'raised',   l: 'Amount raised', t: 'number' },
+      { k: 'lead',     l: 'Project lead', t: 'text' },
+      { k: 'status',   l: 'Status', t: 'select', opts: ['Planned', 'In Progress', 'Completed', 'On Hold'] },
+      { k: 'notes',    l: 'Notes', t: 'text' }
+    ]
+  };
+
+  var state = {
+    data: null, activeCat: null, activeTab: null, query: '',
+    unlocked: false, unlockedCats: {}, modalSave: null
+  };
+
+  /* ---------------- storage ---------------- */
+  function blankData() {
+    var d = { appPass: APP_PASS_DEFAULT, currency: '', lastSnapshot: '', snapshots: [], seeded: false, cats: {} };
+    Object.keys(CATS).forEach(function (k) {
+      var rec = {}; ALL_RECS.forEach(function (m) { rec[m] = []; });
+      d.cats[k] = { name: CATS[k].name, pass: CATS[k].pass, records: rec };
+    });
+    return d;
+  }
+
+  function load() {
+    var raw = null;
+    try { raw = localStorage.getItem(STORE_KEY); } catch (e) { raw = null; }
+    var base = blankData();
+    if (!raw) { state.data = base; return; }
+    try {
+      var p = JSON.parse(raw);
+      base.appPass = p.appPass || base.appPass;
+      base.currency = p.currency || '';
+      base.lastSnapshot = p.lastSnapshot || '';
+      base.snapshots = Array.isArray(p.snapshots) ? p.snapshots : [];
+      base.seeded = !!p.seeded;
+      Object.keys(CATS).forEach(function (k) {
+        if (p.cats && p.cats[k]) {
+          base.cats[k].name = p.cats[k].name || base.cats[k].name;
+          base.cats[k].pass = p.cats[k].pass || base.cats[k].pass;
+          var r = p.cats[k].records || {};
+          ALL_RECS.forEach(function (m) { if (Array.isArray(r[m])) base.cats[k].records[m] = r[m]; });
+        }
+      });
+      state.data = base;
+    } catch (e) { state.data = base; }
+  }
+
+  function save() {
+    try { localStorage.setItem(STORE_KEY, JSON.stringify(state.data)); }
+    catch (e) { toast('Could not save \u2014 device storage unavailable'); }
+  }
+
+  /* ---------------- helpers ---------------- */
+  function $(id) { return document.getElementById(id); }
+  function uid() { return Math.random().toString(36).slice(2, 9) + Date.now().toString(36); }
+  function todayISO() { return new Date().toISOString().slice(0, 10); }
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]; }); }
+  function money(n) { return CUR + (Number(n) || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+  function num(n) { return Number(n) || 0; }
+  function lineTotal(r, q, p) { return num(r[q]) * num(r[p]); }
+  function grade(s) { s = num(s); return s >= 70 ? 'A' : s >= 60 ? 'B' : s >= 50 ? 'C' : s >= 45 ? 'D' : 'F'; }
+  function gradeCls(g) { return g === 'A' ? 'good' : g === 'F' ? 'bad' : 'warn'; }
+
+  var toastTimer = null;
+  function toast(msg) {
+    var t = $('toast'); t.textContent = msg; t.classList.add('show');
+    clearTimeout(toastTimer); toastTimer = setTimeout(function () { t.classList.remove('show'); }, 2600);
+  }
+
+  function cat() { return state.data.cats[state.activeCat]; }
+  function catName() { return cat().name; }
+  function recs(m) { var r = cat().records[m]; if (!Array.isArray(r)) { cat().records[m] = []; } return cat().records[m]; }
+
+  /* ---------------- figures ---------------- */
+  function figures(k) {
+    var c = state.data.cats[k], r = c.records;
+    var p = r.purchases || [], s = r.sales || [], a = r.accounting || [], st = r.students || [], inv = r.inventory || [], sac = r.sacraments || [];
+    var cl = r.classrooms || [], te = r.teachers || [], ld = r.leadership || [], sf = r.staff || [], ev = r.events || [];
+    var sv = r.services || [], me = r.members || [], pa = r.pastors || [], us = r.ushers || [], co = r.contributions || [], pr = r.projects || [];
+    var buy = p.reduce(function (t, x) { return t + lineTotal(x, 'qty', 'unitCost'); }, 0);
+    var sell = s.reduce(function (t, x) { return t + lineTotal(x, 'qty', 'unitPrice'); }, 0);
+    var credit = s.filter(function (x) { return x.paid === 'Credit'; }).reduce(function (t, x) { return t + lineTotal(x, 'qty', 'unitPrice'); }, 0);
+    var inc = a.filter(function (x) { return x.type === 'Income'; }).reduce(function (t, x) { return t + num(x.amount); }, 0);
+    var exp = a.filter(function (x) { return x.type !== 'Income'; }).reduce(function (t, x) { return t + num(x.amount); }, 0);
+    var contrib = co.reduce(function (t, x) { return t + num(x.amount); }, 0);
+    var offering = sv.reduce(function (t, x) { return t + num(x.offering); }, 0);
+    var att = sv.filter(function (x) { return x.attendance !== '' && x.attendance != null; });
+    var attAvg = att.length ? att.reduce(function (t, x) { return t + num(x.attendance); }, 0) / att.length : 0;
+    var low = inv.filter(function (x) { return num(x.stock) <= num(x.reorder); });
+    var stockVal = inv.reduce(function (t, x) { return t + num(x.stock) * num(x.unitCost); }, 0);
+    var vacant = ld.filter(function (x) { return !x.name || x.status === 'Vacant'; });
+    var enrolled = cl.reduce(function (t, x) { return t + num(x.enrolled); }, 0);
+    var stuIds = {}; st.forEach(function (x) { stuIds[x.studentId] = 1; });
+    var raised = pr.reduce(function (t, x) { return t + num(x.raised); }, 0), budgets = pr.reduce(function (t, x) { return t + num(x.budget); }, 0);
+    var soon = function (d, within) {
+      if (!d) return null;
+      var t = new Date(todayISO()), x = new Date(d);
+      if (isNaN(x.getTime())) return null;
+      x.setFullYear(t.getFullYear()); if (x < t) x.setFullYear(t.getFullYear() + 1);
+      var days = Math.round((x - t) / 86400000); return days <= within ? days : null;
+    };
+    var bday = [], upcoming = [];
+    me.forEach(function (x) { var d = soon(x.birthDate, 30); if (d !== null) bday.push({ name: x.name, date: x.birthDate, inDays: d }); });
+    ev.forEach(function (x) { var d = soon(x.date, 60); if (d !== null) upcoming.push({ name: x.title, date: x.date, inDays: d, type: x.type }); });
+    var rows = 0; Object.keys(r).forEach(function (kk) { rows += (r[kk] || []).length; });
+    return {
+      rows: rows, p: p.length, s: s.length, a: a.length, st: st.length, inv: inv.length, sac: sac.length,
+      cl: cl.length, te: te.length, ld: ld.length, sf: sf.length, ev: ev.length,
+      sv: sv.length, me: me.length, pa: pa.length, us: us.length, co: co.length, pr: pr.length,
+      buy: buy, sell: sell, credit: credit, inc: inc, exp: exp, contrib: contrib, offering: offering, attAvg: attAvg,
+      gross: sell - buy, net: sell + inc - buy - exp,
+      low: low.length, lowItems: low, stockVal: stockVal,
+      vacant: vacant.length, vacantItems: vacant, enrolled: enrolled, studentCount: Object.keys(stuIds).length,
+      raised: raised, budgets: budgets, bday: bday, upcoming: upcoming,
+      avg: st.length ? st.reduce(function (t, x) { return t + num(x.score); }, 0) / st.length : 0
+    };
+  }
+
+  /* ---------------- theme ---------------- */
+  function applyTheme(t) {
+    document.documentElement.setAttribute('data-theme', t);
+    try { localStorage.setItem(THEME_KEY, t); } catch (e) {}
+    var m = document.querySelector('meta[name="theme-color"]');
+    if (m) m.setAttribute('content', t === 'dark' ? '#0b1220' : '#101828');
+  }
+  function initTheme() {
+    var t = 'light';
+    try { t = localStorage.getItem(THEME_KEY) || (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'); } catch (e) {}
+    applyTheme(t);
+  }
+  function toggleTheme() {
+    var cur = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
+    applyTheme(cur === 'dark' ? 'light' : 'dark');
+  }
+
+  /* ---------------- offline / PWA ---------------- */
+  function setNetState() {
+    var el = $('netBadge'); if (!el) return;
+    el.textContent = navigator.onLine ? '\u25CF Online \u2014 usable offline after first load' : '\u25CF Offline \u2014 running from this device';
+    el.style.color = navigator.onLine ? '#4ade80' : '#fbbf24';
+  }
+
+  function initPWA() {
+    setNetState();
+    window.addEventListener('online', setNetState);
+    window.addEventListener('offline', setNetState);
+
+    if ('serviceWorker' in navigator && location.protocol.indexOf('http') === 0) {
+      var CORE = JSON.stringify([location.href, location.pathname]);
+      var swSrc = "var CACHE='pp-v3';var CORE=" + CORE + ";" +
+        "self.addEventListener('install',function(e){self.skipWaiting();e.waitUntil(caches.open(CACHE).then(function(c){return Promise.all(CORE.map(function(u){return c.add(u).catch(function(){})}))}))});" +
+        "self.addEventListener('activate',function(e){e.waitUntil(self.clients.claim())});" +
+        "self.addEventListener('fetch',function(e){if(e.request.method!=='GET')return;" +
+        "e.respondWith(caches.open(CACHE).then(function(c){return c.match(e.request,{ignoreSearch:true}).then(function(hit){" +
+        "var net=fetch(e.request).then(function(res){try{c.put(e.request,res.clone())}catch(x){}return res}).catch(function(){return hit});" +
+        "return hit||net;})}))});";
+      function tryBlob() {
+        try {
+          var url = URL.createObjectURL(new Blob([swSrc], { type: 'text/javascript' }));
+          navigator.serviceWorker.register(url, { scope: './' }).catch(function () {});
+        } catch (e) {}
+      }
+      navigator.serviceWorker.register('./sw.js', { scope: './' }).catch(tryBlob);
+    }
+    window.addEventListener('beforeinstallprompt', function (e) {
+      e.preventDefault(); deferredPrompt = e;
+      var b = $('installBtn'); if (b) b.classList.remove('hidden');
+    });
+    var b = $('installBtn');
+    if (b) b.onclick = function () {
+      if (deferredPrompt) { deferredPrompt.prompt(); deferredPrompt.userChoice.finally(function () { deferredPrompt = null; b.classList.add('hidden'); }); }
+      else toast('Use your browser menu \u2192 \u201CAdd to Home screen\u201D to install');
+    };
+    window.addEventListener('appinstalled', function () { var bi = $('installBtn'); if (bi) bi.classList.add('hidden'); toast('Installed on this device'); });
+  }
+  var deferredPrompt = null;
+
+  /* ---------------- lock ---------------- */
+  function initLock() {
+    var input = $('lockInput'), msg = $('lockMsg');
+    function attempt() {
+      if (String(input.value).trim() === state.data.appPass) {
+        state.unlocked = true; msg.textContent = '';
+        $('lock').classList.add('hidden'); $('app').classList.remove('hidden');
+        openCategory(null);
+      } else {
+        msg.textContent = 'Incorrect app passcode. Please try again.';
+        input.value = ''; input.focus();
+      }
+    }
+    $('lockBtn').onclick = attempt;
+    input.addEventListener('keydown', function (e) { if (e.key === 'Enter') attempt(); });
+  }
+
+  /* ---------------- category gating ---------------- */
+  function openCategory(key) {
+    if (key === null) {
+      var open = Object.keys(CATS).filter(function (k) { return state.unlockedCats[k]; });
+      key = open.length ? open[0] : Object.keys(CATS)[0];
+    }
+    if (!state.unlockedCats[key]) { askCategoryPass(key); return; }
+    state.activeCat = key; state.activeTab = CATS[key].modules[0]; state.query = '';
+    if ($('search')) $('search').value = '';
+    renderNav(); renderShell(); renderPanel();
+  }
+
+  function askCategoryPass(key) {
+    var c = state.data.cats[key];
+    showModal('Unlock ' + esc(c.name),
+      '<p class="muted tiny" style="margin:-6px 0 14px">Enter this category\u2019s passcode to open its records.</p>' +
+      '<div class="fld"><label for="cpass">Category passcode</label><input id="cpass" type="password" autocomplete="off" placeholder="\u2022\u2022\u2022\u2022\u2022\u2022\u2022"></div>' +
+      '<p id="cpassMsg" class="err"></p>', 'Unlock', function () {
+      var v = ($('cpass') ? $('cpass').value : '').trim();
+      if (v === c.pass) {
+        state.unlockedCats[key] = true; hideModal();
+        state.activeCat = key; state.activeTab = CATS[key].modules[0];
+        renderNav(); renderShell(); renderPanel(); toast(c.name + ' unlocked'); return true;
+      }
+      if ($('cpassMsg')) $('cpassMsg').textContent = 'Incorrect passcode for ' + c.name + '.';
+      return false;
+    });
+  }
+
+  function lockApp() {
+    state.unlocked = false; state.unlockedCats = {}; state.activeCat = null;
+    $('lock').classList.remove('hidden'); $('app').classList.add('hidden');
+    $('lockInput').value = ''; $('lockMsg').textContent = '';
+  }
+
+  /* ---------------- shell ---------------- */
+  function renderNav() {
+    var nav = $('catNav');
+    nav.innerHTML = Object.keys(CATS).map(function (k) {
+      var c = state.data.cats[k], open = !!state.unlockedCats[k], f = figures(k);
+      var badge = (f.low > 0 && CATS[k].modules.indexOf('inventory') > -1) ? ' \u26A0' : '';
+      return '<button class="cat-btn' + (state.activeCat === k ? ' active' : '') + '" data-cat="' + k + '">' +
+        '<span class="dot"></span><span>' + esc(c.name) + badge + '</span>' +
+        '<span class="lk">' + (open ? (f.rows + ' rec') : '\uD83D\uDD12') + '</span></button>';
+    }).join('');
+    Array.prototype.forEach.call(nav.querySelectorAll('[data-cat]'), function (b) {
+      b.onclick = function () { openCategory(b.getAttribute('data-cat')); };
+    });
+  }
+
+  function renderShell() {
+    var k = state.activeCat, c = state.data.cats[k], f = figures(k), hasInv = CATS[k].modules.indexOf('inventory') > -1;
+    $('catTitle').textContent = c.name;
+    $('footBackup').textContent = state.data.lastSnapshot ? ('Last snapshot: ' + state.data.lastSnapshot + ' \u00B7 ' + state.data.snapshots.length + ' saved') : 'No snapshot yet';
+    $('count').textContent = f.rows + ' record' + (f.rows === 1 ? '' : 's') + ' in ' + c.name;
+
+    var cards = [
+      { k: 'RECORDS', v: f.rows, s: 'All entries in ' + c.name },
+      { k: 'PURCHASES', v: money(f.buy), s: f.p + ' purchase record' + (f.p === 1 ? '' : 's') },
+      { k: 'SALES', v: money(f.sell), s: f.s + ' sale record' + (f.s === 1 ? '' : 's'), cls: 'good' },
+      { k: 'CREDIT SALES', v: money(f.credit), s: 'Awaiting payment', cls: f.credit > 0 ? 'warn' : '' },
+      { k: 'NET POSITION', v: money(f.net), s: 'Sales + income \u2212 purchases \u2212 expenses', cls: f.net >= 0 ? 'good' : 'bad' }
+    ];
+    if (hasInv) {
+      cards.splice(1, 0, { k: 'STOCK VALUE', v: money(f.stockVal), s: f.inv + ' item' + (f.inv === 1 ? '' : 's') + ' on register', cls: '' });
+      cards.push({ k: 'LOW STOCK', v: f.low, s: f.low ? 'Need reordering now' : 'All levels healthy', cls: f.low ? 'bad' : 'good' });
+    }
+    if (k === 'school') {
+      cards.push({ k: 'CLASSROOMS', v: f.cl, s: f.enrolled + ' students enrolled', cls: '' });
+      cards.push({ k: 'TEACHERS', v: f.te, s: f.sf + ' staff on record', cls: '' });
+      cards.push({ k: 'AVG SCORE', v: f.st ? f.avg.toFixed(1) + '%' : '\u2014', s: f.studentCount + ' student' + (f.studentCount === 1 ? '' : 's') + ' \u00B7 ' + f.st + ' record' + (f.st === 1 ? '' : 's'), cls: '' });
+      cards.push({ k: 'VACANT POSTS', v: f.vacant, s: f.vacant ? 'Leadership slots to fill' : 'All posts filled', cls: f.vacant ? 'warn' : 'good' });
+      cards.push({ k: 'EVENTS', v: f.ev, s: f.upcoming.length ? f.upcoming[0].name + ' in ' + f.upcoming[0].inDays + ' days' : 'Nothing scheduled soon', cls: '' });
+    }
+    if (k === 'church') {
+      cards.push({ k: 'MEMBERS', v: f.me, s: f.pa + ' pastor(s) \u00B7 ' + f.us + ' usher(s)', cls: '' });
+      cards.push({ k: 'SERVICES', v: f.sv, s: f.attAvg ? 'Avg attendance ' + Math.round(f.attAvg) : 'Attendance not recorded', cls: '' });
+      cards.push({ k: 'CONTRIBUTIONS', v: money(f.contrib), s: f.co + ' record' + (f.co === 1 ? '' : 's') + ' \u00B7 offerings ' + money(f.offering), cls: 'good' });
+      cards.push({ k: 'PROJECTS', v: f.pr, s: money(f.raised) + ' raised of ' + money(f.budgets), cls: '' });
+      cards.push({ k: 'BIRTHDAYS', v: f.bday.length, s: f.bday.length ? 'Within the next 30 days' : 'None in next 30 days', cls: f.bday.length ? 'warn' : '' });
+      cards.push({ k: 'SACRAMENTS', v: f.sac, s: 'Records in the register', cls: '' });
+    }
+
+    $('stats').innerHTML = cards.map(function (x) {
+      return '<div class="stat ' + (x.cls || '') + '"><div class="k">' + x.k + '</div><div class="v">' + x.v + '</div><div class="s">' + x.s + '</div></div>';
+    }).join('');
+
+    $('tabs').innerHTML = CATS[k].modules.map(function (m) {
+      var alert = (m === 'inventory' && f.low) ? ' \u26A0' : '';
+      return '<button class="tab' + (state.activeTab === m ? ' active' : '') + '" data-tab="' + m + '">' + MODULES[m].label + alert + '</button>';
+    }).join('');
+    Array.prototype.forEach.call($('tabs').querySelectorAll('[data-tab]'), function (b) {
+      b.onclick = function () { state.activeTab = b.getAttribute('data-tab'); state.query = ''; $('search').value = ''; renderShell(); renderPanel(); };
+    });
+
+    var hideAdd = (state.activeTab === 'reports' || state.activeTab === 'backup');
+    $('addBtn').style.display = hideAdd ? 'none' : '';
+    $('addBtn').textContent = '+ Add ' + MODULES[state.activeTab].single;
+  }
+
+  /* ---------------- panel ---------------- */
+  function filtered(m) {
+    var q = state.query.trim().toLowerCase(), list = recs(m).slice();
+    if (q) list = list.filter(function (r) { return Object.keys(r).some(function (k) { return String(r[k]).toLowerCase().indexOf(q) !== -1; }); });
+    return list;
+  }
+
+  function renderPanel() {
+    var m = state.activeTab;
+    if (m === 'reports') return renderReports();
+    if (m === 'backup') return renderBackup();
+    return renderTable(m);
+  }
+
+  function cols(m) {
+    if (m === 'inventory') return [['sku', 'SKU'], ['name', 'Item'], ['category', 'Group'], ['stock', 'Stock', 1], ['reorder', 'Reorder', 1], ['unitCost', 'Unit cost', 1], ['unitPrice', 'Unit price', 1], ['expiry', 'Expiry']];
+    if (m === 'purchases') return [['date', 'Date'], ['supplier', 'Supplier'], ['item', 'Item'], ['qty', 'Qty', 1], ['unitCost', 'Unit cost', 1], ['paid', 'Payment']];
+    if (m === 'sales') return [['date', 'Date'], ['customer', 'Customer'], ['item', 'Item'], ['qty', 'Qty', 1], ['unitPrice', 'Unit price', 1], ['paid', 'Payment']];
+    if (m === 'accounting') return [['date', 'Date'], ['type', 'Type'], ['account', 'Account'], ['description', 'Description'], ['amount', 'Amount', 1]];
+    if (m === 'sacraments') return [['date', 'Date'], ['type', 'Sacrament'], ['name', 'Full name'], ['second', 'Spouse/Parent'], ['minister', 'Minister'], ['register', 'Register no.']];
+    if (m === 'classrooms') return [['name', 'Class'], ['level', 'Level'], ['formMaster', 'Form teacher'], ['room', 'Room'], ['capacity', 'Capacity', 1], ['enrolled', 'Enrolled', 1], ['notes', 'Notes']];
+    if (m === 'teachers') return [['staffId', 'Staff ID'], ['name', 'Name'], ['subjects', 'Subjects'], ['className', 'Class'], ['qualification', 'Qualification'], ['phone', 'Phone'], ['status', 'Status']];
+    if (m === 'leadership') return [['post', 'Post'], ['name', 'Name'], ['phone', 'Phone'], ['duty', 'Duty / portfolio'], ['since', 'Since'], ['status', 'Status']];
+    if (m === 'staff') return [['name', 'Name'], ['role', 'Role'], ['department', 'Department'], ['phone', 'Phone'], ['status', 'Status']];
+    if (m === 'events') return [['title', 'Title'], ['date', 'Date'], ['type', 'Type'], ['venue', 'Venue'], ['organizer', 'Organiser'], ['notes', 'Notes']];
+    if (m === 'services') return [['date', 'Date'], ['serviceType', 'Service'], ['theme', 'Theme / sermon'], ['preacher', 'Preacher'], ['attendance', 'Attendance', 1], ['offering', 'Offering', 1], ['notes', 'Notes']];
+    if (m === 'members') return [['memberId', 'Member ID'], ['name', 'Name'], ['gender', 'Gender'], ['category', 'Category'], ['phone', 'Phone'], ['birthDate', 'Birthday'], ['status', 'Status']];
+    if (m === 'pastors') return [['name', 'Name'], ['role', 'Role'], ['phone', 'Phone'], ['assignment', 'Assignment'], ['ordination', 'Ordained'], ['status', 'Status']];
+    if (m === 'ushers') return [['usherId', 'Usher ID'], ['name', 'Name'], ['team', 'Team'], ['phone', 'Phone'], ['duty', 'Duty'], ['status', 'Status']];
+    if (m === 'contributions') return [['date', 'Date'], ['contributor', 'Contributor'], ['type', 'Type'], ['amount', 'Amount', 1], ['method', 'Method'], ['receipt', 'Receipt']];
+    if (m === 'projects') return [['title', 'Project'], ['start', 'Start'], ['deadline', 'Deadline'], ['budget', 'Budget', 1], ['raised', 'Raised', 1], ['lead', 'Lead'], ['status', 'Status']];
+    return [['studentId', 'Student ID'], ['name', 'Name'], ['className', 'Class'], ['term', 'Term'], ['subject', 'Subject'], ['score', 'Score', 1]];
+  }
+
+  function renderTable(m) {
+    var list = filtered(m), defs = cols(m), total = 0, rows = '';
+
+    list.forEach(function (r) {
+      var cells = defs.map(function (d) {
+        var v = r[d[0]];
+        var out = esc(v === '' || v == null ? '\u2014' : v);
+        if (d[0] === 'paid') out = pill(v);
+        if (d[0] === 'type' && m === 'accounting') out = pill(v);
+        if (d[0] === 'expiry' && v) { var soon = (new Date(v) - new Date()) / 86400000 <= 90; out = '<span class="pill ' + (soon ? 'warn' : 'info') + '">' + esc(v) + '</span>'; }
+        return '<td class="' + (d[2] ? 'num' : '') + '" data-label="' + d[1] + '">' + out + '</td>';
+      }).join('');
+      if (m === 'purchases') { var t1 = lineTotal(r, 'qty', 'unitCost'); total += t1; cells += '<td class="num" data-label="Total">' + money(t1) + '</td>'; }
+      if (m === 'sales') { var t2 = lineTotal(r, 'qty', 'unitPrice'); total += t2; cells += '<td class="num" data-label="Total">' + money(t2) + '</td>'; }
+      if (m === 'accounting') total += num(r.amount);
+      if (m === 'contributions') total += num(r.amount);
+      if (m === 'services') total += num(r.offering);
+      if (m === 'inventory') {
+        var low = num(r.stock) <= num(r.reorder);
+        cells += '<td data-label="Status"><span class="pill ' + (low ? 'bad' : 'good') + '">' + (low ? 'Reorder' : 'OK') + '</span></td>';
+      }
+      if (m === 'students') { var g = grade(r.score); cells += '<td data-label="Grade"><span class="pill ' + gradeCls(g) + '">' + g + '</span></td>'; }
+
+      if (m === 'projects') {
+        var pct = num(r.budget) > 0 ? Math.round(num(r.raised) / num(r.budget) * 100) : (num(r.raised) > 0 ? 100 : 0);
+        cells += '<td data-label="Progress"><span class="pill ' + (pct >= 100 ? 'paid' : pct >= 50 ? 'warn' : 'credit') + '">' + pct + '%</span></td>';
+      }
+      if (m === 'members') {
+        var bd = '\u2014';
+        if (r.birthDate) {
+          var t0 = new Date(todayISO()), x0 = new Date(r.birthDate);
+          if (!isNaN(x0.getTime())) {
+            x0.setFullYear(t0.getFullYear()); if (x0 < t0) x0.setFullYear(t0.getFullYear() + 1);
+            var dd = Math.round((x0 - t0) / 86400000);
+            bd = '<span class="pill ' + (dd <= 30 ? 'warn' : 'info') + '">' + (dd === 0 ? 'Today' : 'In ' + dd + ' days') + '</span>';
+          }
+        }
+        cells += '<td data-label="Birthday">' + bd + '</td>';
+      }
+      var acts = '';
+      acts += '<button class="mini" data-edit="' + r.id + '" data-m="' + m + '">Edit</button>';
+      if (m === 'sales') acts += '<button class="mini" data-receipt="' + r.id + '">Receipt</button>';
+      if (m === 'students') acts += '<button class="mini" data-card="' + esc(r.studentId) + '">Report card</button>';
+      acts += '<button class="mini del" data-del="' + r.id + '">Delete</button>';
+      cells += '<td data-label=""><div class="row-actions">' + acts + '</div></td>';
+
+      rows += '<tr>' + cells + '</tr>';
+    });
+
+    var head = defs.map(function (d) { return '<th class="' + (d[2] ? 'num' : '') + '">' + d[1] + '</th>'; }).join('');
+    if (m === 'purchases' || m === 'sales') head += '<th class="num">Total</th>';
+    if (m === 'inventory') head += '<th>Status</th>';
+    if (m === 'students') head += '<th>Grade</th>';
+    if (m === 'projects') head += '<th>Progress</th>';
+    if (m === 'members') head += '<th>Birthday</th>';
+    head += '<th></th>';
+
+    var body = list.length
+      ? '<div style="overflow-x:auto"><table><thead><tr>' + head + '</tr></thead><tbody>' + rows + '</tbody></table></div>'
+      : '<div class="empty"><div class="ico">\uD83D\uDCE6</div><strong>No records yet</strong><p class="tiny">Add your first ' + MODULES[m].single.toLowerCase() + ' to this category.</p></div>';
+
+    var totalPill = '';
+    if (m === 'purchases') totalPill = '<span class="pill credit">Total: ' + money(total) + '</span>';
+    if (m === 'sales') totalPill = '<span class="pill good">Total: ' + money(total) + '</span>';
+    if (m === 'accounting') totalPill = '<span class="pill warn">Net: ' + money(total) + '</span>';
+    if (m === 'services') totalPill = '<span class="pill good">Offering: ' + money(total) + '</span>';
+    if (m === 'contributions') totalPill = '<span class="pill good">Total: ' + money(total) + '</span>';
+
+    $('panel').innerHTML = '<div class="card"><div class="card-head"><div><h3>' + MODULES[m].label + ' register</h3>' +
+      '<div class="sub">Showing ' + list.length + ' of ' + recs(m).length + ' record' + (recs(m).length === 1 ? '' : 's') + '</div></div>' +
+      '<div class="toolbar">' + totalPill + '<button class="mini" data-exportcsv="' + m + '">Export CSV</button></div></div>' + body + '</div>' +
+      noticeFor(m);
+
+    Array.prototype.forEach.call($('panel').querySelectorAll('[data-del]'), function (b) {
+      b.onclick = function () {
+        var id = b.getAttribute('data-del'), arr = recs(m), i = arr.findIndex(function (r) { return r.id === id; });
+        if (i > -1 && confirm('Delete this record permanently?')) { arr.splice(i, 1); save(); renderNav(); renderShell(); renderPanel(); toast('Record deleted'); }
+      };
+    });
+    Array.prototype.forEach.call($('panel').querySelectorAll('[data-receipt]'), function (b) {
+      b.onclick = function () { var r = recs('sales').find(function (x) { return x.id === b.getAttribute('data-receipt'); }); if (r) openReceipt(r); };
+    });
+    Array.prototype.forEach.call($('panel').querySelectorAll('[data-card]'), function (b) {
+      b.onclick = function () { openReportCard(b.getAttribute('data-card')); };
+    });
+    Array.prototype.forEach.call($('panel').querySelectorAll('[data-edit]'), function (b) {
+      b.onclick = function () {
+        var mm = b.getAttribute('data-m'), id = b.getAttribute('data-edit');
+        var r = recs(mm).find(function (x) { return x.id === id; });
+        if (r) openForm(mm, r);
+      };
+    });
+    var ex = $('panel').querySelector('[data-exportcsv]');
+    if (ex) ex.onclick = function () { exportCSV(ex.getAttribute('data-exportcsv')); };
+  }
+
+  function pill(v) {
+    if (v === 'Paid' || v === 'Income' || v === 'Active' || v === 'Completed' || v === 'Present' || v === 'OK') return '<span class="pill paid">' + esc(v) + '</span>';
+    if (v === 'Credit' || v === 'Expense' || v === 'Inactive' || v === 'Vacant' || v === 'Absent' || v === 'Rejected') return '<span class="pill credit">' + esc(v) + '</span>';
+    return v ? '<span class="pill warn">' + esc(v) + '</span>' : '\u2014';
+  }
+
+  function inventoryNotice() {
+    var f = figures(state.activeCat);
+    if (!f.low) return '<div class="notice">All ' + f.inv + ' stock item' + (f.inv === 1 ? '' : 's') + ' are above their reorder level. Stock value on hand: <strong>' + money(f.stockVal) + '</strong>.</div>';
+    return '<div class="notice"><strong>\u26A0 Low-stock reminder \u2014 ' + f.low + ' item' + (f.low === 1 ? '' : 's') + ' to reorder:</strong> ' +
+      f.lowItems.slice(0, 8).map(function (r) { return esc(r.name) + ' (' + esc(r.stock) + ' left)'; }).join(', ') +
+      (f.low > 8 ? ' and ' + (f.low - 8) + ' more' : '') + '.</div>';
+  }
+
+  function accountingNote() {
+    var f = figures(state.activeCat);
+    return '<div class="notice"><strong>Auto-posted from Purchase &amp; Sales:</strong> purchases ' + money(f.buy) +
+      ' (out) \u00B7 sales ' + money(f.sell) + ' (in) \u00B7 manual income ' + money(f.inc) + ' \u00B7 manual expenses ' + money(f.exp) +
+      '. Net position for ' + esc(catName()) + ': <strong>' + money(f.net) + '</strong>. ' +
+      (f.credit > 0 ? '\u26A0 ' + money(f.credit) + ' of sales are still on credit.' : '') + '</div>';
+  }
+
+  function noticeFor(m) {
+    if (m === 'inventory') return inventoryNotice();
+    if (m === 'accounting') return accountingNote();
+    if (m === 'leadership') return leadershipNotice();
+    if (m === 'staff' || m === 'teachers') return staffNotice();
+    if (m === 'classrooms') return classroomNotice();
+    if (m === 'services') return servicesNotice();
+    if (m === 'members') return membersNotice();
+    if (m === 'contributions') return contributionsNotice();
+    if (m === 'projects') return projectsNotice();
+    if (m === 'events') return eventsNotice();
+    return '';
+  }
+
+  function leadershipNotice() {
+    var f = figures(state.activeCat);
+    if (!f.vacant) return '<div class="notice">All five posts are filled \u2014 Proprietor, Principal, Vice Principal (VP), Head Teacher and Security. Tap <strong>Edit</strong> on any row to change the post holder.</div>';
+    return '<div class="notice"><strong>\u26A0 ' + f.vacant + ' post' + (f.vacant === 1 ? '' : 's') + ' still to fill:</strong> ' +
+      f.vacantItems.map(function (x) { return esc(x.post); }).join(', ') + '. Tap <strong>Edit</strong> to enter the name, phone and duty for each.</div>';
+  }
+
+  function staffNotice() {
+    var f = figures(state.activeCat);
+    return '<div class="notice">' + f.sf + ' staff member' + (f.sf === 1 ? '' : 's') + ' on record \u00B7 ' + f.te + ' teacher' + (f.te === 1 ? '' : 's') + ' \u00B7 ' + f.cl + ' classroom' + (f.cl === 1 ? '' : 's') + ' \u00B7 ' + f.enrolled + ' students enrolled.' +
+      (f.vacant ? ' <strong>\u26A0 ' + f.vacant + ' leadership post' + (f.vacant === 1 ? '' : 's') + ' vacant.</strong>' : '') + '</div>';
+  }
+
+  function classroomNotice() {
+    var f = figures(state.activeCat);
+    return '<div class="notice">' + f.cl + ' classroom' + (f.cl === 1 ? '' : 's') + ' across the school, holding <strong>' + f.enrolled + '</strong> enrolled students in total. ' +
+      (f.te ? f.te + ' teachers are on record \u2014 assign a form teacher to each class.' : 'Add teachers, then assign a form teacher to each class.') + '</div>';
+  }
+
+  function servicesNotice() {
+    var f = figures(state.activeCat);
+    return '<div class="notice"><strong>' + f.sv + ' service' + (f.sv === 1 ? '' : 's') + '</strong> recorded \u00B7 average attendance <strong>' + (f.attAvg ? Math.round(f.attAvg) : '\u2014') + '</strong> \u00B7 offerings collected <strong>' + money(f.offering) + '</strong>. Log Sunday, Tuesday and Thursday services, anniversaries and birthdays here.</div>';
+  }
+
+  function membersNotice() {
+    var f = figures(state.activeCat);
+    var b = f.bday.length ? '<strong>\uD83C\uDF82 Birthday' + (f.bday.length === 1 ? '' : 's') + ' in the next 30 days:</strong> ' + f.bday.map(function (x) { return esc(x.name) + ' (' + x.inDays + 'd)'; }).join(', ') + '.' : 'No birthdays in the next 30 days.';
+    return '<div class="notice">' + f.me + ' member' + (f.me === 1 ? '' : 's') + ' on the register. ' + b + '</div>';
+  }
+
+  function contributionsNotice() {
+    var f = figures(state.activeCat);
+    return '<div class="notice">Total contributions recorded: <strong>' + money(f.contrib) + '</strong> across ' + f.co + ' entr' + (f.co === 1 ? 'y' : 'ies') + '. Service offerings add a further <strong>' + money(f.offering) + '</strong> through the Services tab.</div>';
+  }
+
+  function projectsNotice() {
+    var f = figures(state.activeCat);
+    return '<div class="notice">' + f.pr + ' project' + (f.pr === 1 ? '' : 's') + ' \u00B7 <strong>' + money(f.raised) + '</strong> raised against a combined budget of <strong>' + money(f.budgets) + '</strong>.</div>';
+  }
+
+  function eventsNotice() {
+    var f = figures(state.activeCat);
+    if (!f.ev) return '<div class="notice">No events yet. Add anniversaries, birthdays, PTA meetings, examinations, conventions and outreach dates here.</div>';
+    return '<div class="notice">' + f.ev + ' event' + (f.ev === 1 ? '' : 's') + ' on the calendar. ' + (f.upcoming.length ? 'Next up: <strong>' + esc(f.upcoming[0].name) + '</strong> in ' + f.upcoming[0].inDays + ' day' + (f.upcoming[0].inDays === 1 ? '' : 's') + '.' : 'Nothing falls in the next 60 days.') + '</div>';
+  }
+
+  /* ---------------- receipt ---------------- */
+  function openReceipt(r) {
+    var t = lineTotal(r, 'qty', 'unitPrice');
+    var html = '<div class="receipt" id="rcpt"><h4>' + esc(catName()) + '</h4>' +
+      '<div class="tiny" style="text-align:center;margin-bottom:12px">Sales receipt</div>' +
+      '<div class="rc-line"><span>Date</span><span>' + esc(r.date) + '</span></div>' +
+      '<div class="rc-line"><span>Customer</span><span>' + esc(r.customer) + '</span></div>' +
+      '<div class="rc-line"><span>Item</span><span>' + esc(r.item) + '</span></div>' +
+      '<div class="rc-line"><span>Qty \u00D7 Price</span><span>' + esc(r.qty) + ' \u00D7 ' + money(r.unitPrice) + '</span></div>' +
+      '<div class="rc-total"><span>TOTAL</span><span>' + money(t) + '</span></div>' +
+      '<div class="tiny" style="text-align:center;margin-top:12px">Payment: ' + esc(r.paid || 'Paid') + ' \u00B7 Ref ' + esc(String(r.id).slice(0, 6).toUpperCase()) + '</div>' +
+      '<div class="tiny" style="text-align:center;margin-top:6px">Thank you.</div></div>';
+    showModal('Receipt', html, 'Print receipt', function () {
+      var pa = $('printArea'); pa.innerHTML = '<div class="receipt">' + ($('rcpt') ? $('rcpt').innerHTML : '') + '</div>';
+      window.print(); pa.innerHTML = ''; return false;
+    });
+  }
+
+  /* ---------------- report card ---------------- */
+  function openReportCard(studentId) {
+    var list = recs('students').filter(function (r) { return String(r.studentId) === String(studentId); });
+    if (!list.length) return;
+    var name = list[0].name, cls = list[0].className, term = list[0].term || '';
+    var avg = list.reduce(function (t, r) { return t + num(r.score); }, 0) / list.length;
+    var rows = list.map(function (r) {
+      return '<tr><td data-label="Subject">' + esc(r.subject) + '</td><td class="num" data-label="Score">' + esc(r.score) + '</td>' +
+        '<td data-label="Grade"><span class="pill ' + gradeCls(grade(r.score)) + '">' + grade(r.score) + '</span></td>' +
+        '<td data-label="Remarks">' + esc(r.remarks || '\u2014') + '</td></tr>';
+    }).join('');
+    var html = '<div class="notice"><strong>' + esc(name) + '</strong> \u00B7 ' + esc(cls) + (term ? ' \u00B7 ' + esc(term) : '') +
+      ' \u00B7 Student ID ' + esc(studentId) + '</div>' +
+      '<div style="overflow-x:auto"><table><thead><tr><th>Subject</th><th class="num">Score</th><th>Grade</th><th>Remarks</th></tr></thead><tbody>' + rows + '</tbody></table></div>' +
+      '<div class="notice" style="margin-top:14px">Subjects: <strong>' + list.length + '</strong> \u00B7 Average: <strong>' + avg.toFixed(1) + '%</strong> \u00B7 Overall grade: <strong>' + grade(avg) + '</strong></div>';
+    showModal('Report card', html, 'Print report card', function () {
+      var pa = $('printArea'); pa.innerHTML = html; window.print(); pa.innerHTML = ''; return false;
+    });
+  }
+
+  /* ---------------- reports ---------------- */
+  function renderReports() {
+    var k = state.activeCat, f = figures(k), c = state.data.cats[k];
+    var out = ['<div class="card"><div class="card-head"><div><h3>' + esc(c.name) + ' \u2014 report</h3><div class="sub">Generated ' + todayISO() + '</div></div>' +
+      '<div class="toolbar"><button class="mini" onclick="window.print()">Print / PDF</button></div></div>'];
+    out.push(blocks('Financial summary', [
+      ['Total purchases (out)', money(f.buy)], ['Total sales (in)', money(f.sell)],
+      ['Credit sales outstanding', money(f.credit)], ['Manual income', money(f.inc)],
+      ['Manual expenses', money(f.exp)], ['Gross margin', money(f.gross)], ['Net position', money(f.net)]
+    ]));
+    out.push(blocks('Activity', [
+      ['Purchase records', f.p], ['Sales records', f.s], ['Accounting entries', f.a],
+      ['Student records', f.st], ['Sacrament records', f.sac], ['Stock items', f.inv],
+      ['Classrooms', f.cl], ['Teachers', f.te], ['Staff & roles', f.sf], ['Leadership posts', f.ld],
+      ['Members', f.me], ['Pastors', f.pa], ['Ushers', f.us], ['Services', f.sv],
+      ['Contributions', f.co], ['Projects', f.pr], ['Events', f.ev],
+      ['Backup snapshots', state.data.snapshots.length]
+    ]));
+    if (CATS[k].modules.indexOf('inventory') > -1) {
+      out.push(blocks('Stock summary', [['Stock value on hand', money(f.stockVal)], ['Low-stock items', f.low], ['Items tracked', f.inv]]));
+    }
+
+    var reminders = [];
+    if (f.low) reminders.push('<strong>\u26A0 ' + f.low + ' item' + (f.low === 1 ? '' : 's') + ' at or below reorder level:</strong> ' + f.lowItems.slice(0, 6).map(function (r) { return esc(r.name) + ' (' + esc(r.stock) + ')'; }).join(', '));
+    if (f.credit > 0) reminders.push('<strong>\u26A0 ' + money(f.credit) + ' of sales are unpaid (credit).</strong> Follow up with customers.');
+    if (k === 'school' && f.st && f.avg < 50) reminders.push('<strong>\u26A0 Class average is ' + f.avg.toFixed(1) + '%.</strong> Consider remedial action.');
+    if (f.vacant) reminders.push('<strong>\u26A0 ' + f.vacant + ' leadership post' + (f.vacant === 1 ? '' : 's') + ' vacant:</strong> ' + f.vacantItems.map(function (x) { return esc(x.post); }).join(', ') + '.');
+    if (f.bday.length) reminders.push('<strong>\uD83C\uDF82 Upcoming birthday' + (f.bday.length === 1 ? '' : 's') + ':</strong> ' + f.bday.map(function (x) { return esc(x.name) + ' (' + x.inDays + 'd)'; }).join(', ') + '.');
+    (c.records.projects || []).forEach(function (r) {
+      if (r.deadline && r.status !== 'Completed') {
+        var dd = (new Date(r.deadline) - new Date(today)) / 86400000;
+        if (dd < 0) reminders.push('<strong>\u26A0 Project \u201C' + esc(r.title) + '\u201D is past its deadline</strong> (' + esc(r.deadline) + ').');
+        else if (dd <= 30) reminders.push('<strong>\u26A0 Project \u201C' + esc(r.title) + '\u201D due in ' + Math.round(dd) + ' days.</strong>');
+      }
+    });
+    var today = todayISO();
+    (c.records.inventory || []).forEach(function (r) {
+      if (r.expiry) { var d = (new Date(r.expiry) - new Date(today)) / 86400000; if (d < 0) reminders.push('<strong>\u26A0 ' + esc(r.name) + ' expired on ' + esc(r.expiry) + '.</strong> Remove from sale.'); else if (d <= 90) reminders.push('<strong>\u26A0 ' + esc(r.name) + ' expires ' + esc(r.expiry) + '</strong> (' + Math.round(d) + ' days).'); }
+    });
+    out.push('<div class="card"><div class="card-head"><h3>Reminders</h3></div>' +
+      (reminders.length ? '<ul style="margin:0;padding-left:20px">' + reminders.map(function (x) { return '<li style="margin-bottom:9px">' + x + '</li>'; }).join('') + '</ul>' : '<div class="empty tiny">Nothing needs attention right now.</div>') + '</div>');
+
+    var top = {};
+    (c.records.sales || []).forEach(function (r) { top[r.item] = (top[r.item] || 0) + lineTotal(r, 'qty', 'unitPrice'); });
+    var topRows = Object.keys(top).sort(function (a, b) { return top[b] - top[a]; }).slice(0, 5);
+    out.push('<div class="card"><div class="card-head"><h3>Top selling items</h3></div>' +
+      (topRows.length ? '<table><thead><tr><th>Item</th><th class="num">Value</th></tr></thead><tbody>' +
+        topRows.map(function (n) { return '<tr><td data-label="Item">' + esc(n) + '</td><td class="num" data-label="Value">' + money(top[n]) + '</td></tr>'; }).join('') + '</tbody></table>'
+        : '<div class="empty tiny">No sales recorded yet.</div>') + '</div>');
+
+    if (k === 'school') {
+      var st = c.records.students || [];
+      out.push('<div class="card"><div class="card-head"><h3>Academic performance</h3></div>' +
+        (st.length ? '<table><thead><tr><th>Name</th><th>Class</th><th>Subject</th><th class="num">Score</th><th>Grade</th></tr></thead><tbody>' +
+          st.slice().sort(function (a, b) { return num(b.score) - num(a.score); }).map(function (r) {
+            return '<tr><td data-label="Name">' + esc(r.name) + '</td><td data-label="Class">' + esc(r.className) + '</td><td data-label="Subject">' + esc(r.subject) + '</td>' +
+              '<td class="num" data-label="Score">' + esc(r.score) + '</td><td data-label="Grade"><span class="pill ' + gradeCls(grade(r.score)) + '">' + grade(r.score) + '</span></td></tr>';
+          }).join('') + '</tbody></table><div class="notice" style="margin-top:14px">Class average: <strong>' + f.avg.toFixed(1) + '%</strong> across ' + st.length + ' subject record' + (st.length === 1 ? '' : 's') + '.</div>'
+          : '<div class="empty tiny">No student records captured yet.</div>') + '</div>');
+    }
+
+    if (k === 'school') {
+      var ld = c.records.leadership || [], clr = c.records.classrooms || [];
+      out.push('<div class="card"><div class="card-head"><h3>Leadership &amp; roles</h3></div>' +
+        (ld.length ? '<table><thead><tr><th>Post</th><th>Name</th><th>Phone</th><th>Status</th></tr></thead><tbody>' +
+          ld.map(function (r) { return '<tr><td data-label="Post">' + esc(r.post) + '</td><td data-label="Name">' + (r.name ? esc(r.name) : '<span class="muted">Vacant</span>') + '</td><td data-label="Phone">' + esc(r.phone || '\u2014') + '</td><td data-label="Status">' + pill(r.status || 'Vacant') + '</td></tr>'; }).join('') + '</tbody></table>'
+          : '<div class="empty tiny">No posts created yet.</div>') + '</div>');
+      out.push(blocks('School staffing', [['Classrooms', f.cl], ['Teachers', f.te], ['Staff on record', f.sf], ['Students enrolled', f.enrolled], ['Vacant leadership posts', f.vacant]]));
+      out.push('<div class="card"><div class="card-head"><h3>Classrooms</h3></div>' +
+        (clr.length ? '<table><thead><tr><th>Class</th><th>Form teacher</th><th class="num">Enrolled</th><th class="num">Capacity</th></tr></thead><tbody>' +
+          clr.map(function (r) { return '<tr><td data-label="Class">' + esc(r.name) + '</td><td data-label="Form teacher">' + esc(r.formMaster || '\u2014') + '</td><td class="num" data-label="Enrolled">' + esc(r.enrolled || '0') + '</td><td class="num" data-label="Capacity">' + esc(r.capacity || '\u2014') + '</td></tr>'; }).join('') + '</tbody></table>'
+          : '<div class="empty tiny">No classrooms recorded yet.</div>') + '</div>');
+    }
+
+    if (k === 'church') {
+      var me = c.records.members || [], coR = c.records.contributions || [], prR = c.records.projects || [];
+      out.push(blocks('Church summary', [['Members', f.me], ['Pastors', f.pa], ['Ushers', f.us], ['Services held', f.sv], ['Avg attendance', f.attAvg ? Math.round(f.attAvg) : '\u2014'], ['Total contributions', money(f.contrib)], ['Projects', f.pr]]));
+      var byType = {};
+      coR.forEach(function (r) { byType[r.type || 'Other'] = (byType[r.type || 'Other'] || 0) + num(r.amount); });
+      var bt = Object.keys(byType).sort(function (a, b) { return byType[b] - byType[a]; });
+      out.push('<div class="card"><div class="card-head"><h3>Contributions by type</h3></div>' +
+        (bt.length ? '<table><thead><tr><th>Type</th><th class="num">Amount</th></tr></thead><tbody>' + bt.map(function (n) { return '<tr><td data-label="Type">' + esc(n) + '</td><td class="num" data-label="Amount">' + money(byType[n]) + '</td></tr>'; }).join('') + '</tbody></table>' : '<div class="empty tiny">No contributions recorded yet.</div>') + '</div>');
+      out.push('<div class="card"><div class="card-head"><h3>Projects &amp; progress</h3></div>' +
+        (prR.length ? '<table><thead><tr><th>Project</th><th class="num">Budget</th><th class="num">Raised</th><th>Status</th></tr></thead><tbody>' +
+          prR.map(function (r) { return '<tr><td data-label="Project">' + esc(r.title) + '</td><td class="num" data-label="Budget">' + money(r.budget) + '</td><td class="num" data-label="Raised">' + money(r.raised) + '</td><td data-label="Status">' + pill(r.status || 'Planned') + '</td></tr>'; }).join('') + '</tbody></table>' : '<div class="empty tiny">No projects recorded yet.</div>') + '</div>');
+      out.push('<div class="card"><div class="card-head"><h3>Upcoming birthdays &amp; anniversaries</h3></div>' +
+        (f.bday.length ? '<table><thead><tr><th>Member</th><th>Birthday</th><th class="num">In</th></tr></thead><tbody>' +
+          f.bday.slice().sort(function (a, b) { return a.inDays - b.inDays; }).map(function (b) { return '<tr><td data-label="Member">' + esc(b.name) + '</td><td data-label="Birthday">' + esc(b.date) + '</td><td class="num" data-label="In">' + b.inDays + ' days</td></tr>'; }).join('') + '</tbody></table>' : '<div class="empty tiny">No birthdays in the next 30 days.</div>') +
+        (f.upcoming.length ? '<div class="notice" style="margin-top:14px">Next events: ' + f.upcoming.slice(0, 4).map(function (x) { return esc(x.name) + ' (' + x.inDays + 'd)'; }).join(', ') + '</div>' : '') + '</div>');
+    }
+
+    var recent = []
+      .concat((c.records.purchases || []).map(function (r) { return { d: r.date, t: 'Purchase', x: r.item + ' \u00B7 ' + r.supplier, v: lineTotal(r, 'qty', 'unitCost') }; }))
+      .concat((c.records.sales || []).map(function (r) { return { d: r.date, t: 'Sale', x: r.item + ' \u00B7 ' + r.customer, v: lineTotal(r, 'qty', 'unitPrice') }; }))
+      .concat((c.records.accounting || []).map(function (r) { return { d: r.date, t: r.type || 'Entry', x: r.account, v: num(r.amount) }; }))
+      .concat((c.records.sacraments || []).map(function (r) { return { d: r.date, t: r.type, x: r.name, v: 0 }; }))
+      .sort(function (a, b) { return String(b.d).localeCompare(String(a.d)); }).slice(0, 10);
+
+    out.push('<div class="card"><div class="card-head"><h3>Recent activity</h3></div>' +
+      (recent.length ? '<table><thead><tr><th>Date</th><th>Module</th><th>Detail</th><th class="num">Value</th></tr></thead><tbody>' +
+        recent.map(function (r) { return '<tr><td data-label="Date">' + esc(r.d) + '</td><td data-label="Module">' + esc(r.t) + '</td><td data-label="Detail">' + esc(r.x) + '</td><td class="num" data-label="Value">' + (r.v ? money(r.v) : '\u2014') + '</td></tr>'; }).join('') + '</tbody></table>'
+        : '<div class="empty tiny">Nothing recorded yet.</div>') + '</div>');
+
+    out.push('</div>');
+    $('panel').innerHTML = out.join('');
+  }
+
+  function blocks(title, pairs) {
+    return '<div class="card"><div class="card-head"><h3>' + title + '</h3></div><div class="stats" style="margin:0">' +
+      pairs.map(function (p) { return '<div class="stat"><div class="k">' + esc(p[0]) + '</div><div class="v" style="font-size:19px">' + esc(p[1]) + '</div></div>'; }).join('') + '</div></div>';
+  }
+
+  /* ---------------- backup ---------------- */
+  function renderBackup() {
+    var c = cat(), snaps = state.data.snapshots.slice().reverse();
+    $('panel').innerHTML =
+      '<div class="card"><div class="card-head"><div><h3>Daily backup</h3><div class="sub">A snapshot is taken automatically the first time you open the app each day.</div></div>' +
+      '<div class="toolbar"><button class="mini" id="doSnap">Take snapshot now</button><button class="mini" id="expAll">Export all (JSON)</button><button class="mini" id="expCat">Export ' + esc(c.name) + '</button><button class="mini" id="impBtn">Import JSON</button></div></div>' +
+      '<div class="notice">Last automatic snapshot: <strong>' + (state.data.lastSnapshot || 'none yet') + '</strong> \u00B7 ' + state.data.snapshots.length + ' snapshot' + (state.data.snapshots.length === 1 ? '' : 's') + ' stored on this device.</div>' +
+      '<input type="file" id="importFile" accept="application/json,.json" style="display:none">' +
+      (snaps.length ? '<table><thead><tr><th>Snapshot</th><th>Categories</th><th class="num">Records</th><th></th></tr></thead><tbody>' +
+        snaps.map(function (s) {
+          var rows = 0; Object.keys(s.cats || {}).forEach(function (kk) { var r = s.cats[kk].records || {}; Object.keys(r).forEach(function (mm) { rows += (r[mm] || []).length; }); });
+          return '<tr><td data-label="Snapshot"><strong>' + esc(s.date) + '</strong><div class="tiny muted">' + esc(s.time || '') + ' \u00B7 ' + esc(s.kind || 'auto') + '</div></td>' +
+            '<td data-label="Categories">' + Object.keys(s.cats || {}).length + '</td><td class="num" data-label="Records">' + rows + '</td>' +
+            '<td data-label=""><div class="row-actions"><button class="mini" data-restore="' + s.id + '">Restore</button><button class="mini del" data-snapdel="' + s.id + '">Delete</button></div></td></tr>';
+        }).join('') + '</tbody></table>'
+        : '<div class="empty"><div class="ico">\uD83D\uDDC4\uFE0F</div><strong>No snapshots yet</strong><p class="tiny">Take a manual snapshot or return tomorrow for the automatic one.</p></div>') +
+      '</div>';
+
+    $('doSnap').onclick = function () { snapshot('manual'); toast('Snapshot saved'); renderBackup(); renderShell(); };
+    $('expAll').onclick = exportAll;
+    $('expCat').onclick = exportCat;
+    $('impBtn').onclick = function () { $('importFile').click(); };
+    $('importFile').onchange = function (e) { importJSON(e.target.files[0]); e.target.value = ''; };
+    Array.prototype.forEach.call($('panel').querySelectorAll('[data-restore]'), function (b) {
+      b.onclick = function () {
+        var s = state.data.snapshots.find(function (x) { return x.id === b.getAttribute('data-restore'); });
+        if (s && confirm('Restore the ' + s.date + ' snapshot? Current records will be replaced.')) {
+          state.data.cats = s.cats; state.data.lastSnapshot = s.date; save(); renderNav(); renderShell(); renderBackup(); toast('Snapshot restored');
+        }
+      };
+    });
+    Array.prototype.forEach.call($('panel').querySelectorAll('[data-snapdel]'), function (b) {
+      b.onclick = function () {
+        state.data.snapshots = state.data.snapshots.filter(function (x) { return x.id !== b.getAttribute('data-snapdel'); });
+        save(); renderBackup(); renderShell();
+      };
+    });
+  }
+
+  function snapshot(kind) {
+    state.data.snapshots.push({ id: uid(), date: todayISO(), time: new Date().toLocaleTimeString(), kind: kind, cats: JSON.parse(JSON.stringify(state.data.cats)) });
+    state.data.lastSnapshot = todayISO();
+    if (state.data.snapshots.length > 30) state.data.snapshots = state.data.snapshots.slice(-30);
+    save();
+  }
+  function autoBackup() { if (state.data.lastSnapshot !== todayISO()) snapshot('auto'); }
+
+  function download(name, text, type) {
+    var blob = new Blob([text], { type: type || 'application/json' });
+    var a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name;
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    setTimeout(function () { URL.revokeObjectURL(a.href); }, 1500);
+  }
+  function exportAll() { download('parishpriest-backup-' + todayISO() + '.json', JSON.stringify(state.data, null, 2)); toast('Full backup downloaded'); }
+  function exportCat() { download('parishpriest-' + state.activeCat + '-' + todayISO() + '.json', JSON.stringify({ category: state.activeCat, name: catName(), records: cat().records }, null, 2)); toast(catName() + ' exported'); }
+
+  function importJSON(file) {
+    if (!file) return;
+    var fr = new FileReader();
+    fr.onload = function () {
+      try {
+        var d = JSON.parse(fr.result);
+        if (d.cats) { state.data = d; save(); renderNav(); renderShell(); renderBackup(); toast('Full backup restored'); }
+        else if (d.category && d.records) { state.data.cats[d.category].records = d.records; save(); renderNav(); renderShell(); renderBackup(); toast('Category records imported'); }
+        else { toast('Unrecognised backup file'); }
+      } catch (e) { toast('Could not read that file'); }
+    };
+    fr.readAsText(file);
+  }
+
+  function exportCSV(m) {
+    var list = filtered(m);
+    if (!list.length) { toast('Nothing to export in this view'); return; }
+    var keys = Object.keys(list[0]).filter(function (k) { return k !== 'id'; });
+    var csv = keys.join(',') + '\n' + list.map(function (r) { return keys.map(function (c) { return '"' + String(r[c] == null ? '' : r[c]).replace(/"/g, '""') + '"'; }).join(','); }).join('\n');
+    download(state.activeCat + '-' + m + '-' + todayISO() + '.csv', csv, 'text/csv');
+    toast('CSV exported');
+  }
+
+  /* ---------------- modal ---------------- */
+  function showModal(title, body, saveLabel, onSave) {
+    $('modalTitle').innerHTML = title;
+    $('modalBody').innerHTML = body;
+    $('modalSave').textContent = saveLabel || 'Save';
+    state.modalSave = onSave;
+    $('modal').classList.remove('hidden');
+    var f = $('modalBody').querySelector('input,select,textarea'); if (f) setTimeout(function () { try { f.focus(); } catch (e) {} }, 60);
+  }
+  function hideModal() { $('modal').classList.add('hidden'); $('modalBody').innerHTML = ''; state.modalSave = null; }
+
+  function openForm(m, existing) {
+    var defs = FIELDS[m];
+    var html = defs.map(function (f) {
+      var opts = f.catOpts ? (f.catOpts[state.activeCat] || f.opts) : f.opts;
+      var cur = existing ? (existing[f.k] == null ? '' : String(existing[f.k])) : '';
+      if (f.t === 'select') return '<div class="fld"><label for="f_' + f.k + '">' + f.l + '</label><select id="f_' + f.k + '">' +
+        opts.map(function (o) { return '<option' + (o === cur ? ' selected' : '') + '>' + esc(o) + '</option>'; }).join('') + '</select></div>';
+      var val = existing ? cur : (f.t === 'date' && f.k === 'date' ? todayISO() : '');
+      return '<div class="fld"><label for="f_' + f.k + '">' + f.l + (f.req ? ' *' : '') + '</label>' +
+        '<input id="f_' + f.k + '" type="' + (f.t === 'number' ? 'number' : f.t === 'date' ? 'date' : 'text') + '"' +
+        (f.t === 'number' ? ' step="any" min="0" inputmode="decimal"' : '') + ' value="' + esc(val) + '" placeholder="' + esc(f.ph || '') + '"></div>';
+    }).join('');
+    showModal((existing ? 'Edit ' : 'Add ') + MODULES[m].single + ' \u2014 ' + esc(catName()), html + '<p id="formMsg" class="err"></p>',
+      existing ? 'Save changes' : ('Save ' + MODULES[m].single), function () {
+      var rec = existing || { id: uid() };
+      for (var i = 0; i < defs.length; i++) {
+        var f = defs[i], el = $('f_' + f.k), v = el ? el.value.trim() : '';
+        if (f.req && !v) { $('formMsg').textContent = f.l + ' is required.'; return false; }
+        rec[f.k] = v;
+      }
+      if (!existing) recs(m).push(rec);
+      save(); hideModal(); renderNav(); renderShell(); renderPanel();
+      toast(MODULES[m].single + ' ' + (existing ? 'updated' : 'added') + ' in ' + catName()); return true;
+    });
+  }
+
+  function openAdd() { openForm(state.activeTab, null); }
+
+  function seedDefaults() {
+    if (state.data.seeded) return;
+    var ld = state.data.cats.school.records.leadership;
+    ['Proprietor', 'Principal', 'Vice Principal (VP)', 'Head Teacher', 'Security'].forEach(function (p) {
+      if (!ld.some(function (x) { return x.post === p; })) {
+        ld.push({ id: uid(), post: p, name: '', phone: '', duty: '', since: '', status: 'Vacant' });
+      }
+    });
+    state.data.seeded = true;
+    save();
+  }
+
+  function openRename() {
+    showModal('Rename category', '<div class="fld"><label for="rn">Category name</label><input id="rn" type="text" value="' + esc(catName()) + '"></div>' +
+      '<p class="muted tiny">Renaming only changes the label \u2014 its records and passcode stay with this workspace.</p>', 'Save name', function () {
+      var v = ($('rn').value || '').trim();
+      if (!v) return false;
+      cat().name = v; save(); hideModal(); renderNav(); renderShell(); renderPanel(); toast('Category renamed'); return true;
+    });
+  }
+
+  /* ---------------- boot ---------------- */
+  function boot() {
+    load(); initTheme(); initPWA(); initLock(); seedDefaults(); autoBackup();
+    $('lockNow').onclick = function (e) { e.preventDefault(); lockApp(); };
+    $('themeBtn').onclick = function (e) { e.preventDefault(); toggleTheme(); };
+    $('renameBtn').onclick = openRename;
+    $('addBtn').onclick = openAdd;
+    $('modalCancel').onclick = hideModal;
+    $('modalSave').onclick = function () { if (typeof state.modalSave === 'function') state.modalSave(); };
+    $('modal').addEventListener('click', function (e) { if (e.target === $('modal')) hideModal(); });
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !$('modal').classList.contains('hidden')) hideModal(); });
+    $('search').addEventListener('input', function (e) { state.query = e.target.value; renderPanel(); });
+  }
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot); else boot();
+})();
+
+</script>
+</body>
+</html>
